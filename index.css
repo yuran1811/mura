@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700;800&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Dosis', sans-serif;
+}
+
+.wrapper {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(53, 53, 53);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer {
+  position: absolute;
+  top: -15px;
+  width: 80px;
+  height: 50px;
+  color: black;
+  background-color: rgb(247, 236, 85);
+  border: 6px solid black;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.timer .time {
+  color: inherit;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.health-bar {
+  position: absolute;
+  width: calc(50vw - 40px);
+  height: 60px;
+  background-color: rgb(219, 219, 219);
+}
+.health-bar .indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: rgb(253, 67, 107);
+  transition: all 0.5s ease;
+}
+
+#player-health {
+  left: 0;
+}
+#player-health .indicator {
+  right: 0;
+}
+
+#enemy-health {
+  right: 0;
+}
+#enemy-health .indicator {
+  left: 0;
+}
+
+.status {
+  position: fixed;
+  top: 10px;
+  z-index: -1;
+  height: 100px;
+  padding: 10px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.status .message {
+  color: white;
+  font-size: 40px;
+  font-weight: bold;
+  text-align: center;
+}

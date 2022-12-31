@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./index.css" />
+    <title>Mura</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="status-bar">
+        <div id="player-health" class="health-bar">
+          <div class="indicator"></div>
+        </div>
+        <div class="timer">
+          <span class="time">🔅</span>
+        </div>
+        <div id="enemy-health" class="health-bar">
+          <div class="indicator"></div>
+        </div>
+      </div>
+
+      <canvas id="app"></canvas>
+
+      <div class="status">
+        <span class="message"></span>
+      </div>
+    </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>
