@@ -1,17 +1,31 @@
-'use strict';
+import './styles/index.css';
+
+import { FRAME_HEIGHT, FRAME_WIDTH, GRAVITY, MATCH_TIME } from './constants';
+import { getCharDir, rectCollision, resetBackground } from './utils';
 
 const $ = document.querySelector.bind(document);
-const $$ = document.querySelectorAll.bind(document);
 
-const canvas = $('#app');
-const c = canvas.getContext('2d');
+const canvas = $('#app') as HTMLCanvasElement;
+const c = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-canvas.width = 1024;
-canvas.height = 576;
+canvas.width = FRAME_WIDTH;
+canvas.height = FRAME_HEIGHT;
 
-const MATCH_TIME = 10;
-const GRAVITY = 0.8;
-const KEYS = {
+const ELEMENTS = {
+  statusEle: $('.status') as HTMLDivElement,
+  statusMesEle: $('.status .message') as HTMLDivElement,
+  timeEle: $('.timer .time') as HTMLDivElement,
+
+  playerHealthIndicator: $('#player-health .indicator') as HTMLDivElement,
+  enemyHealthIndicator: $('#enemy-health .indicator') as HTMLDivElement,
+};
+
+const KEYS: {
+  [key: string]: {
+    pressed: number;
+    maxPress?: number;
+  };
+} = {
   a: { pressed: 0 },
   d: { pressed: 0 },
   w: { pressed: 0, maxPress: 2 },
@@ -27,30 +41,20 @@ const KEY_CONFIG = {
   enemy: { up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright', attack: '1' },
 };
 
-const app = {
+const app: {
+  timerId: undefined | number;
+  animationId: undefined | number;
+} = {
   timerId: undefined,
   animationId: undefined,
 };
 
-const getCharDir = (CLASS, name) => `./assets/characters/${CLASS}/${name}`;
-const resetBackground = () => {
-  c.fillStyle = 'rgba(0, 0, 0, 1)';
-  c.fillRect(0, 0, canvas.width, canvas.height);
+const setMatchStatus = (status: string) => {
+  ELEMENTS.statusEle.style.display = 'flex';
+  ELEMENTS.statusMesEle.innerText = status;
+  ELEMENTS.timeEle.innerText = '🔅';
 };
-const rectCollision = (a, b) => {
-  return (
-    a.position.x + a.width >= b.position.x &&
-    a.position.x <= b.width + b.position.x &&
-    a.position.y + a.height >= b.position.y &&
-    a.position.y <= b.height + b.position.y
-  );
-};
-const setMatchStatus = (status) => {
-  $('.status').style.display = 'flex';
-  $('.status .message').innerText = status;
-  $('.timer .time').innerText = '🔅';
-};
-const winnerDetect = (a, b) => {
+const winnerDetect = (a: any, b: any) => {
   if (a.health === b.health) setMatchStatus('Tie');
   else if (a.health > b.health) setMatchStatus('Player 1 wins');
   else if (a.health < b.health) setMatchStatus('Player 2 wins');
@@ -59,7 +63,7 @@ const winnerDetect = (a, b) => {
 };
 const setMatchTime = (time = MATCH_TIME) => {
   const timer = () => {
-    $('.timer .time').innerText = time;
+    ELEMENTS.timeEle.innerText = time + '';
     if (time > 0) {
       time--;
       app.timerId = setTimeout(timer, 1000);
@@ -69,8 +73,40 @@ const setMatchTime = (time = MATCH_TIME) => {
   timer();
 };
 
+interface Coor {
+  x: number;
+  y: number;
+}
+
 class Sprite {
-  constructor({ position, imgSrc, scale = 1, frames = 1, size: { width, height }, offset = { x: 0, y: 0 } }) {
+  position: Coor;
+  width: number;
+  height: number;
+  offset: Coor;
+
+  frames: number;
+  framesCurrent: number;
+  framesElapsed: number;
+  framesHold: number;
+
+  scale: number;
+  image: HTMLImageElement;
+
+  constructor({
+    position,
+    imgSrc,
+    scale = 1,
+    frames = 1,
+    size: { width, height },
+    offset = { x: 0, y: 0 },
+  }: {
+    position: Coor;
+    imgSrc: string;
+    scale?: number;
+    frames?: number;
+    size: { width: number; height: number };
+    offset?: Coor;
+  }) {
     this.position = position;
     this.width = width;
     this.height = height;
@@ -114,6 +150,16 @@ class Sprite {
   }
 }
 class Hero extends Sprite {
+  velocity: Coor;
+  keyConfig: any;
+  color: string;
+  health: number;
+  dead: boolean;
+  lastKey: string | undefined;
+  isAttacking: boolean;
+  attackBox: any;
+  sprites: any;
+
   constructor({
     position,
     velocity,
@@ -125,7 +171,23 @@ class Hero extends Sprite {
     scale = 1,
     frames = 1,
     sprites,
-    attackBox = { offset: {}, width: undefined, height: undefined },
+    attackBox = { offset: { x: 0, y: 0 }, width: undefined, height: undefined },
+  }: {
+    position: Coor;
+    velocity: Coor;
+    color: string;
+    imgSrc: string;
+    scale: number;
+    frames: number;
+    size: { width: number; height: number };
+    offset: Coor;
+    keyConfig: any;
+    sprites: any;
+    attackBox: {
+      offset: Coor;
+      width: number | undefined;
+      height: number | undefined;
+    };
   }) {
     super({ position, imgSrc, frames, scale, offset, size });
 
@@ -169,7 +231,7 @@ class Hero extends Sprite {
     this.switchSprite('attack1');
     this.isAttacking = true;
   }
-  takeHit(hitToTake) {
+  takeHit(hitToTake: number) {
     this.health -= hitToTake;
 
     if (this.health <= 0) {
@@ -177,7 +239,7 @@ class Hero extends Sprite {
     } else this.switchSprite('takeHit');
   }
 
-  switchSprite(sprite) {
+  switchSprite(sprite: string) {
     if (this.image === this.sprites.death.image) {
       if (this.framesCurrent === this.sprites.death.frames - 1) this.dead = true;
       return;
@@ -372,7 +434,7 @@ addEventListener('keydown', (e) => {
         item.lastKey = key;
         break;
       case item.keyConfig.up:
-        if (++KEYS[key].pressed <= KEYS[key].maxPress) {
+        if (++KEYS[key].pressed <= (KEYS[key]?.maxPress || 1)) {
           item.velocity.y = -15;
         }
         break;
@@ -401,7 +463,7 @@ oncontextmenu = (e) => {
 (function animation() {
   app.animationId = requestAnimationFrame(animation);
 
-  resetBackground();
+  resetBackground(canvas, c);
   OBJECTS.forEach((item) => item.update());
 
   [player, enemy].forEach((item) => {
@@ -430,7 +492,7 @@ oncontextmenu = (e) => {
 
     if (enemy.health > 0) {
       enemy.takeHit(0.1);
-      $('#enemy-health .indicator').style.width = `${Math.floor(enemy.health * 100)}%`;
+      ELEMENTS.enemyHealthIndicator.style.width = `${Math.floor(enemy.health * 100)}%`;
     }
   }
   if (player.isAttacking && player.framesCurrent === 4) {
@@ -442,7 +504,7 @@ oncontextmenu = (e) => {
 
     if (player.health > 0) {
       player.takeHit(0.1);
-      $('#player-health .indicator').style.width = `${Math.floor(player.health * 100)}%`;
+      ELEMENTS.playerHealthIndicator.style.width = `${Math.floor(player.health * 100)}%`;
     }
   }
   if (enemy.isAttacking && enemy.framesCurrent === 2) {
