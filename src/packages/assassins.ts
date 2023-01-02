@@ -13,6 +13,7 @@ const kenji: HeroPackageProps = {
     scale: 2.5,
     attackBox: {
       offset: { x: 40, y: 0 },
+      offsetOrigin: { x: 40, y: 0 },
       width: 160,
       height: 150,
     },
@@ -43,6 +44,7 @@ const doko: HeroPackageProps = {
     scale: 2.5,
     attackBox: {
       offset: { x: 40, y: 0 },
+      offsetOrigin: { x: 40, y: 0 },
       width: 160,
       height: 150,
     },

@@ -12,9 +12,10 @@ const evolin: HeroPackageProps = {
     frames: 4,
     scale: 2.5,
     attackBox: {
-      offset: { x: 70, y: -70 },
-      width: 150,
-      height: 150,
+      offset: { x: 80, y: -100 },
+      offsetOrigin: { x: 80, y: -100 },
+      width: 180,
+      height: 180,
     },
   },
   spritesRaw: {

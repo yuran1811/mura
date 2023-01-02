@@ -26,6 +26,7 @@ export interface HeroProps {
   scale: number;
   attackBox: {
     offset: Coor;
+    offsetOrigin: Coor;
   } & Size;
   sprites: HeroSprites;
 }

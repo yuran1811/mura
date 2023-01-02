@@ -1,12 +1,13 @@
 import { ELEMENTS, GRAVITY } from '../constants';
 import { c } from '../core/main';
 import { Coor, HeroSprites, Size, SpriteTypes } from '../types';
-import { Sprite } from './Sprite';
+import Sprite from './Sprite';
 
-export class Hero extends Sprite {
+export default class Hero extends Sprite {
   keyConfig: any;
   lastKey: string | undefined;
   velocity: Coor;
+  prevVelocity: number;
   health: number;
   dead: boolean;
   isAttacking: boolean;
@@ -23,7 +24,7 @@ export class Hero extends Sprite {
     frames = 1,
     offset = { x: 0, y: 0 },
     sprites,
-    attackBox = { offset: { x: 0, y: 0 }, width: undefined, height: undefined },
+    attackBox,
   }: {
     keyConfig: any;
     position: Coor;
@@ -34,25 +35,22 @@ export class Hero extends Sprite {
     frames: number;
     offset: Coor;
     sprites: HeroSprites;
-    attackBox: {
-      offset: Coor;
-    } & Partial<Size>;
+    attackBox: any;
   }) {
     super({ position, size, imgSrc, scale, frames, offset });
 
     this.keyConfig = keyConfig;
     this.lastKey = '';
     this.velocity = velocity;
+    this.prevVelocity = velocity.x / Math.abs(velocity.x);
 
     this.health = 1;
     this.dead = false;
 
     this.isAttacking = false;
     this.attackBox = {
+      ...attackBox,
       position,
-      offset: attackBox.offset,
-      width: attackBox.width,
-      height: attackBox.height,
     };
 
     this.framesCurrent = 0;
@@ -68,9 +66,9 @@ export class Hero extends Sprite {
   }
 
   isBound() {
-    return this.position.x + this.width + this.velocity.x > ELEMENTS.canvas.width
+    return this.position.x + 2 * this.width + this.velocity.x > ELEMENTS.canvas.width
       ? 1
-      : this.position.x < this.width
+      : this.position.x < this.width || this.position.x < 0
       ? -1
       : 0;
   }
@@ -82,13 +80,20 @@ export class Hero extends Sprite {
     // if (this.isAttacking) return;
     this.switchSprite('attack');
     this.isAttacking = true;
+
+    if (this.prevVelocity < 0 && this.attackBox.offset.x >= 0)
+      this.attackBox.offset.x = -this.attackBox.offsetOrigin.x - this.attackBox.width + this.width;
+    if (this.prevVelocity > 0 && this.attackBox.offset.x <= 0) this.attackBox.offset.x = this.attackBox.offsetOrigin.x;
   }
   takeHit(hitToTake: number) {
     this.health -= hitToTake;
 
-    if (this.health <= 0) {
+    if (this.health <= 0.001) {
       this.switchSprite('death');
     } else this.switchSprite('takeHit');
+  }
+  restoreHP(pts: number) {
+    this.health += pts;
   }
 
   switchSprite(sprite: string, spriteId?: number) {
@@ -97,7 +102,6 @@ export class Hero extends Sprite {
       return;
     }
 
-    // Overiding others animations
     if (this.image === this.sprites.attack.image && this.framesCurrent < this.sprites.attack.frames - 1) return;
     if (this.image === this.sprites.takeHit.image && this.framesCurrent < this.sprites.takeHit.frames - 1) return;
 
@@ -136,8 +140,15 @@ export class Hero extends Sprite {
   }
 
   update() {
-    this.draw();
     // this.drawSkeleton();
+
+    if (this.isAttacking) {
+      if (this.prevVelocity < 0) this.flipDraw();
+      else this.draw();
+    } else {
+      if (this.velocity.x < 0 || this.prevVelocity < 0) this.flipDraw();
+      else this.draw();
+    }
 
     !this.dead && this.animate();
 

@@ -1,2 +1,2 @@
-export * from './Hero';
-export * from './Sprite';
+export { default as Hero } from './Hero';
+export { default as Sprite } from './Sprite';

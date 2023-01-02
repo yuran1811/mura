@@ -1,6 +1,9 @@
 import { $ } from '../utils';
 
 export const ELEMENTS = {
+  startBtn: $('button#start') as HTMLButtonElement,
+  bgm: $('.bgm') as HTMLAudioElement,
+
   canvas: $('#app') as HTMLCanvasElement,
 
   statusEle: $('.status') as HTMLDivElement,

@@ -1,9 +1,16 @@
-import { FRAME_HEIGHT, FRAME_WIDTH } from '../constants';
+import { ELEMENTS, FRAME_HEIGHT, FRAME_WIDTH } from '../constants';
 import { HeroPackageProps, HeroSprites, SpriteTypes } from '../types';
 
 export const $ = document.querySelector.bind(document);
 
 export const getCharDir = (CLASS: string, name: string) => `/assets/characters/${CLASS}/${name}`;
+export const getBGMFile = (type: string, name: string, ext: string = 'mp3') => `/assets/sounds/${type}/${name}.${ext}`;
+
+export const setBGM = (type: string, name: string) => {
+  ELEMENTS.bgm.src = getBGMFile(type, name);
+  ELEMENTS.bgm.loop = true;
+  ELEMENTS.bgm.play();
+};
 
 export const setFrameSize = (
   canvas: HTMLCanvasElement,

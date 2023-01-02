@@ -1,7 +1,7 @@
 import { c } from '../core/main';
 import { Coor, Size } from '../types';
 
-export class Sprite {
+export default class Sprite {
   position: Coor;
   width: number;
   height: number;
@@ -61,6 +61,26 @@ export class Sprite {
       (this.image.width / this.frames) * this.scale,
       this.image.height * this.scale
     );
+  }
+  flipDraw() {
+    if (!this?.image) return;
+
+    c.translate(this.position.x + this.offset.x + 50, this.position.y - this.offset.y);
+    c.scale(-1, 1);
+    c.drawImage(
+      this.image,
+
+      this.framesCurrent * (this.image.width / this.frames),
+      0,
+      this.image.width / this.frames,
+      this.image.height,
+
+      0,
+      0,
+      (this.image.width / this.frames) * this.scale,
+      this.image.height * this.scale
+    );
+    c.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   animate() {
